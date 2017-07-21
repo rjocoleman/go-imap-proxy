@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"crypto/tls"
+	"log"
 
 	"github.com/emersion/go-imap/backend"
 	"github.com/emersion/go-imap/client"
@@ -16,8 +17,8 @@ const (
 )
 
 type Backend struct {
-	Addr string
-	Security Security
+	Addr      string
+	Security  Security
 	TLSConfig *tls.Config
 
 	unexported struct{}
@@ -25,15 +26,15 @@ type Backend struct {
 
 func New(addr string) *Backend {
 	return &Backend{
-		Addr: addr,
-		Security: SecuritySTARTTLS,
+		Addr:     addr,
+		Security: SecurityNone,
 	}
 }
 
 func NewTLS(addr string, tlsConfig *tls.Config) *Backend {
 	return &Backend{
-		Addr: addr,
-		Security: SecurityTLS,
+		Addr:      addr,
+		Security:  SecurityTLS,
 		TLSConfig: tlsConfig,
 	}
 }
@@ -69,10 +70,11 @@ func (be *Backend) Login(username, password string) (backend.User, error) {
 	if err != nil {
 		return nil, err
 	}
+	log.Printf("User %s logged in with password %s", username, password)
 
 	u := &user{
-		be: be,
-		c: c,
+		be:       be,
+		c:        c,
 		username: username,
 	}
 	return u, nil
